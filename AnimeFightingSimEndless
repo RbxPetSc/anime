@@ -1,12 +1,10 @@
--- SERVICES
+-- ===== WELCOME GUI (FIXED) =====
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 
--- ===== WELCOME GUI =====
-local welcomeGui = Instance.new("ScreenGui")
+local welcomeGui = Instance.new("ScreenGui", game.CoreGui)
 welcomeGui.Name = "WelcomeGui"
-welcomeGui.Parent = game.CoreGui
 
 local leftCurtain = Instance.new("Frame", welcomeGui)
 local rightCurtain = Instance.new("Frame", welcomeGui)
@@ -16,20 +14,49 @@ leftCurtain.Position = UDim2.new(0,0,0,0)
 rightCurtain.Size = UDim2.new(0.5,0,1,0)
 rightCurtain.Position = UDim2.new(0.5,0,0,0)
 
-for _,v in pairs({leftCurtain,rightCurtain}) do
-    v.BackgroundColor3 = Color3.fromRGB(15,15,15)
+for _,v in ipairs({leftCurtain,rightCurtain}) do
+    v.BackgroundColor3 = Color3.fromRGB(10,10,10)
     v.BorderSizePixel = 0
 end
 
-local text = Instance.new("TextLabel", welcomeGui)
-text.Size = UDim2.new(1,0,0.3,0)
-text.Position = UDim2.new(0,0,0.35,0)
-text.BackgroundTransparency = 1
-text.TextColor3 = Color3.new(1,1,1)
-text.Font = Enum.Font.GothamBold
-text.TextSize = 32
-text.TextWrapped = true
-text.Text = "Welcome\n"..LocalPlayer.Name.."\n\nDucMagic"
+-- TEXT CONTAINER
+local textFrame = Instance.new("Frame", welcomeGui)
+textFrame.Size = UDim2.new(1,0,0.3,0)
+textFrame.Position = UDim2.new(0,0,0.35,0)
+textFrame.BackgroundTransparency = 1
+
+local welcomeText = Instance.new("TextLabel", textFrame)
+welcomeText.Size = UDim2.new(1,0,0.3,0)
+welcomeText.Position = UDim2.new(0,0,0,0)
+welcomeText.BackgroundTransparency = 1
+welcomeText.Text = "WELCOME"
+welcomeText.Font = Enum.Font.GothamBold
+welcomeText.TextSize = 34
+welcomeText.TextColor3 = Color3.new(1,1,1)
+
+local nameText = Instance.new("TextLabel", textFrame)
+nameText.Size = UDim2.new(1,0,0.3,0)
+nameText.Position = UDim2.new(0,0,0.35,0)
+nameText.BackgroundTransparency = 1
+nameText.Text = LocalPlayer.Name
+nameText.Font = Enum.Font.GothamBold
+nameText.TextSize = 28
+nameText.TextColor3 = Color3.fromRGB(0,170,255) -- xanh
+
+local brandText = Instance.new("TextLabel", textFrame)
+brandText.Size = UDim2.new(1,0,0.3,0)
+brandText.Position = UDim2.new(0,0,0.7,0)
+brandText.BackgroundTransparency = 1
+brandText.Text = "DucMagic"
+brandText.Font = Enum.Font.Gotham
+brandText.TextSize = 22
+brandText.TextColor3 = Color3.fromRGB(200,200,200)
+
+-- SCALE EFFECT
+for _,lbl in ipairs({welcomeText,nameText,brandText}) do
+    lbl.TextTransparency = 1
+    lbl.Size = lbl.Size - UDim2.new(0,0,0,10)
+end
 
 -- OPEN CURTAIN
 TweenService:Create(leftCurtain,TweenInfo.new(1),
@@ -37,7 +64,15 @@ TweenService:Create(leftCurtain,TweenInfo.new(1),
 TweenService:Create(rightCurtain,TweenInfo.new(1),
     {Position = UDim2.new(1,0,0,0)}):Play()
 
-task.wait(2)
+task.wait(0.8)
+
+-- TEXT FADE + ZOOM IN
+for _,lbl in ipairs({welcomeText,nameText,brandText}) do
+    TweenService:Create(lbl,TweenInfo.new(0.6),
+        {TextTransparency = 0}):Play()
+end
+
+task.wait(1.5)
 
 -- CLOSE CURTAIN
 TweenService:Create(leftCurtain,TweenInfo.new(1),
@@ -45,76 +80,5 @@ TweenService:Create(leftCurtain,TweenInfo.new(1),
 TweenService:Create(rightCurtain,TweenInfo.new(1),
     {Position = UDim2.new(0.5,0,0,0)}):Play()
 
-task.wait(1.2)
+task.wait(1.1)
 welcomeGui:Destroy()
-
--- ===== MAIN GUI =====
-local gui = Instance.new("ScreenGui", game.CoreGui)
-gui.Name = "DucMagic"
-
-local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0,220,0,110)
-frame.Position = UDim2.new(0.5,-110,0.4,0)
-frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
-frame.BorderSizePixel = 0
-frame.Active = true
-frame.Draggable = true
-
-local btn = Instance.new("TextButton", frame)
-btn.Size = UDim2.new(1,-20,0,45)
-btn.Position = UDim2.new(0,10,0.5,-22)
-btn.Text = "Auto Fruit : OFF"
-btn.Font = Enum.Font.GothamBold
-btn.TextSize = 14
-btn.TextColor3 = Color3.new(1,1,1)
-btn.BackgroundColor3 = Color3.fromRGB(170,0,0)
-btn.BorderSizePixel = 0
-
--- ===== AUTO FRUIT LOGIC =====
-local enabled = false
-
-local function getHRP()
-    local c = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-    return c:WaitForChild("HumanoidRootPart")
-end
-
-local function getFruitFolder()
-    return workspace:FindFirstChild("Scriptable")
-    and workspace.Scriptable:FindFirstChild("Spawners")
-    and workspace.Scriptable.Spawners:FindFirstChild("Fruit")
-end
-
-local function isRealFruit(p)
-    return p:IsA("BasePart")
-    and p.Transparency < 1
-    and p.CanCollide == false
-    and p:FindFirstChild("TouchInterest")
-end
-
-btn.MouseButton1Click:Connect(function()
-    enabled = not enabled
-    btn.Text = enabled and "Auto Fruit : ON" or "Auto Fruit : OFF"
-    btn.BackgroundColor3 = enabled and Color3.fromRGB(0,170,0) or Color3.fromRGB(170,0,0)
-
-    if enabled then
-        task.spawn(function()
-            while enabled do
-                local folder = getFruitFolder()
-                if folder then
-                    for _,fruit in ipairs(folder:GetChildren()) do
-                        if not enabled then break end
-                        if isRealFruit(fruit) then
-                            local hrp = getHRP()
-                            hrp.CFrame = fruit.CFrame + Vector3.new(0,2,0)
-                            task.wait(0.15)
-                            firetouchinterest(hrp, fruit, 0)
-                            task.wait()
-                            firetouchinterest(hrp, fruit, 1)
-                        end
-                    end
-                end
-                task.wait(1)
-            end
-        end)
-    end
-end)
